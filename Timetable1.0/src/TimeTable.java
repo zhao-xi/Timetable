@@ -1,80 +1,62 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class TimeTable {
 
     public static void main(String[] args) throws IOException {
         // 1. read AllCourse.txt
-        BufferedReader bfReader = new BufferedReader(new FileReader("./AllCourse.txt"));
+        List<Course> AllCourses = new LinkedList<>();
+        List<String> fileString = myFileIO.toStringList("./AllCourse.txt");
 
-        List<String[]> allCourses = new ArrayList<>();
-        String line = bfReader.readLine(); // this line is table head
-        while((line = bfReader.readLine()) != null) {
-            String[] course = line.split("\\s+");
-            allCourses.add(course);
+        fileString.remove(0); // remove table head
+
+        for(String line : fileString) {
+            Course course = CourseFactory.toCourse(line);
+            AllCourses.add(course);
         }
-        bfReader.close();
 
-//        for(String[] strs : allCourses) {
-//            System.out.println(Arrays.toString(strs));
+//        for(Course course : AllCourses) {
+//            System.out.println(course.toString());
 //        }
 
         // 2. read MySelectedCourseID.txt
-        bfReader = new BufferedReader(new FileReader("./MySelectedCourseID.txt"));
-
-        List<String> mySelectedCoursesID = new ArrayList<>();
-        line = null;
-        while((line = bfReader.readLine()) != null) {
-            String selectedId = line;
-            mySelectedCoursesID.add(selectedId);
+        HashSet<Integer> selectedID = new HashSet<>();
+        fileString = myFileIO.toStringList("./MySelectedCourseID.txt");
+        for(String line : fileString) {
+            selectedID.add(Integer.parseInt(line));
         }
-        bfReader.close();
-//        for(String str : mySelectedCoursesID) {
-//            System.out.println(str);
-//        }
 
         // 3. initialize the time table
-        String[][] timeTable = new String[5][6];
+        String[][] timetable = new String[5][6];
         for(int i = 0; i < 5; i++) {
             for(int j = 0; j < 6; j++) {
-                timeTable[i][j] = "\'\'";
+                timetable[i][j] = "\'\'";
             }
         }
 
 
         // 4. fill in the time table
-        for(String id : mySelectedCoursesID) {
-            for(String[] course : allCourses) {
-                String courseId = course[0];
-                if(id.equals(courseId)) {
-                    int day = Integer.parseInt(course[1]);
-                    int slot = Integer.parseInt(course[2]);
-                    String courseName = course[3];
-                    String location = course[4];
-                    timeTable[day - 1][slot - 1] = "'" + courseName + "@" + location + "'";
-                    break;
-                }
+        for(Course course : AllCourses) {
+            if(selectedID.contains(course.getId())) {
+                int day = course.getDay();
+                int slot = course.getSlot();
+                String info = "'" + course.getName() + "@" + course.getLocation() + "'";
+                timetable[day - 1][slot - 1] = info;
             }
         }
 
-//        for(String[] strs : timeTable) {
-//            System.out.println(Arrays.toString(strs));
-//        }
+        //System.out.println(Arrays.deepToString(timetable));
 
         // 5. replace the placeholders in template.html
-        bfReader = new BufferedReader(new FileReader("./template.html"));
-        PrintWriter pw = new PrintWriter("./timetable.html");
-        
-        String timeTableStr = Arrays.deepToString(timeTable);
-        
-        while((line = bfReader.readLine()) != null) {
-            line = line.replaceFirst("'##TimetableString##'", timeTableStr);
-            pw.println(line);
+        String strTimetable = Arrays.deepToString(timetable);
+
+        fileString = myFileIO.toStringList("./template.html");
+        List<String> newFileString = new LinkedList<>();
+        for(int i = 0; i < fileString.size(); i++) {
+            String line = fileString.get(i);
+            line = line.replaceFirst("'##TimetableString##'", strTimetable);
+            newFileString.add(line);
         }
-        pw.close();
-        bfReader.close();
+        myFileIO.writeToFile("./timetable.html", newFileString);
     }
 }
