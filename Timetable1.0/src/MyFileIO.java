@@ -2,7 +2,7 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class myFileIO {
+public class MyFileIO {
     public static List<String> toStringList(String filePath) {
         try {
             BufferedReader bfReader = new BufferedReader(new FileReader(filePath));
