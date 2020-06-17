@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
     <script src="./Timetables.min.js"></script>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
     <title>大学课表</title>
     <style>
         *{
@@ -104,40 +105,44 @@
 <body>
 <div id="coursesTable"></div>
 <script>
-  
-  var timetable = [['计算机网络@一教301', '数据库概论@一教302', '互联网金融概论@二教108', '软件需求与分析@一教302', '', ''], ['', '', '', '思修@二教205', '', ''], ['', '', 'JAVA应用@三教505', '', '英语@四教106', ''], ['操作系统@一教203', '', '人工智能@一教403', '', '', ''], ['编译原理@一教302', '', '界面设计@一教403', '', '', '图像处理@一教301']];
-  
-  if(timetable[0]=='#'){
-	timetable=[
-				['', '', '', '', '', ''],
-				['', '', '', '', '', ''],
-				['', '', '', '', '', ''],
-				['', '', '', '', '', ''],
-				['', '', '', '', '', '']
-			];
-   }
-   
-  var week = window.innerWidth > 360 ? ['周一', '周二', '周三', '周四', '周五'] :
-    ['一', '二', '三', '四', '五'];
-  var day = new Date().getDay();
-  var courseType = [
-    [{index: '1', name: '8:30'}, 1],
-    [{index: '2', name: '10:30'}, 1],
-    [{index: '3', name: '12:30'}, 1],
-    [{index: '4', name: '14:30'}, 1],
-    [{index: '5', name: '16:30'}, 1],
-    [{index: '6', name: '18:30'}, 1]
-  ];
-  // 实例化(初始化课表)
-  var Timetable = new Timetables({
-    el: '#coursesTable',
-    timetables: timetable,
-    week: week,
-    timetableType: courseType,
-    highlightWeek: day,
-    styles: {
-      Gheight: 50
-    }
+  $(function () {
+      $.ajax({
+          type: "GET",
+          url: "/selectedCourse",
+          data: {
+              studentId:  1
+          },
+          success: function (result) {
+              result = JSON.parse(result);
+              if(result['status'] == 1){
+                  timetable = JSON.parse(result['data']);
+                  console.log(timetable);
+                  var week = window.innerWidth > 360 ? [' 周一', '周二', '周三', '周四', '周五'] :
+                      ['一', '二', '三', '四', '五'];
+                  var day = new Date().getDay();
+                  var courseType = [
+                      [{index: '1', name: '8:30'}, 1],
+                      [{index: '2', name: '10:30'}, 1],
+                      [{index: '3', name: '12:30'}, 1],
+                      [{index: '4', name: '14:30'}, 1],
+                      [{index: '5', name: '16:30'}, 1],
+                      [{index: '6', name: '18:30'}, 1]
+                  ];
+                  // 实例化(初始化课表)
+                  var Timetable = new Timetables({
+                      el: '#coursesTable',
+                      timetables: timetable,
+                      week: week,
+                      timetableType: courseType,
+                      highlightWeek: day,
+                      styles: {
+                          Gheight: 50
+                      }
+                  });
+              }
+          }
+      });
+      //timetable = [['计算机网络@一教301', '数据库概论@一教302', '互联网金融概论@二教108', '软件需求与分析@一教302', '', ''], ['', '', '', '思修@二教205', '', ''], ['', '', 'JAVA应用@三教505', '', '英语@四教106', ''], ['操作系统@一教203', '', '人工智能@一教403', '', '', ''], ['编译原理@一教302', '', '界面设计@一教403', '', '', '图像处理@一教301']];
   });
 </script>
 </body>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>课程列表|选课</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/mui/3.7.1/css/mui.min.css">
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <script src="./static/mui.min.js"></script>
+    <style>
+        p{margin: 3px 0;}
+        .content-bottom{display: flex}
+        .teacher{flex:1;}
+        .selected{width:40px;display: block;}
+        .courselist{width:100%;border:1px solid silver;padding:6px 12px;background-color:#fff;margin-top:3px;}
+    </style>
+</head>
+<body style="margin:0;">
+<div id="content" style="margin:0 auto;width:800px;">
+</div>
+<script>
+    $(function () {
+        //加载课程
+        var studentId = 1;
+
+        $.ajax({
+            type: "GET",
+            url: "/courseList",
+            data: {
+                studentId: studentId
+            },
+            success:function (result) {
+                result = JSON.parse(result);
+                if(result['status'] != 1){
+                    alert(result['msg']);
+                }else{
+                    $(result['data']).each( function(index, value){
+                        var active = value[5] ? "mui-active" : '';
+                        console.log(active);
+                        var state = value[5] ? 1 : -1;
+                        $("#content").append("<div class=\"courselist\">\n" +
+                            "        <div style=\"font-weight: bold;\">"+value[1]+"</div>\n" +
+                            "        <p>Time: 周"+convertToChinese(value[2])+" 第"+value[3]+"节课</p>\n" +
+                            "        <div class=\"content-bottom\">\n" +
+                            "            <span class=\"teacher\">主讲老师："+value[4]+"</span>\n" +
+                            "            <span class=\"selected\">\n" +
+                            "                <div id='switch"+value[0]+"'  state='"+state+"' onclick='changeCourse("+value[0]+")' class=\"mui-switch mui-switch-mini "+active+"\">\n" +
+                            "                    <div class=\"mui-switch-handle\"></div>\n" +
+                            "                </div>\n" +
+                            "            </span>\n" +
+                            "        </div>\n" +
+                            "    </div>");
+                    });
+                    console.log(result['data'])
+                }
+            }
+        });
+    });
+    function convertToChinese(num){
+        var N = [
+            "零", "一", "二", "三", "四", "五", "六", "七", "八", "九"
+        ];
+        console.log(N[num]);
+        return N[num];
+    }
+    function changeCourse(courseId,state) {
+        $.ajax({
+            type: "GET",
+            url: "/changeSelected",
+            data: {
+                courseId:courseId,
+                state:$(`#switch${courseId}`).attr("state"),
+                studentId:localStorage.getItem('studentId')
+            },
+            success: function (result) {
+                result = JSON.parse(result);
+                if(result['status'] != 1){
+                    alert(result['msg']);
+                }else{
+                    var state = $(`#switch${courseId}`).attr("state");
+                    var targetState = state==1 ? -1:1;
+                    $(`#switch${courseId}`).attr("state",targetState);
+                    if(state == 1){
+                        $(`#switch${courseId}`).removeClass('mui-active');
+                    }else{
+                        $(`#switch${courseId}`).addClass('mui-active');
+                    }
+                    //window.location.reload();
+                }
+            }
+        });
+    }
+</script>
+</body>
+</html>
