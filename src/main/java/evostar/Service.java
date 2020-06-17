@@ -29,9 +29,9 @@ public class Service {
         return service;
     }
 
-    public boolean isServeLet(String route) throws IOException, SAXException, ParserConfigurationException {
+    public boolean isServeLet(String id) throws IOException, SAXException, ParserConfigurationException {
 
-        String className = AppConfigHelper.getRouteMap(route);
+        String className = (String) AppConfigHelper.context.getBean(id).getClass().getName();
         if(className==null)
             return false;
         else
@@ -41,19 +41,24 @@ public class Service {
 
     public String  callServeLet(String uri) throws Exception {
         String route = uri.split("\\?")[0];
+        Object classInstance = AppConfigHelper.context.getBean(route);
 
-        String className = AppConfigHelper.getRouteMap(route);
-
-        Class newClass = Class.forName(className);
-        Object classInstance = null;
-
-        synchronized (this.getClass()) {
-            if ((classInstance = controllerInstances.get(className)) == null) {
-                classInstance = newClass.newInstance();
-                controllerInstances.put(className, classInstance);
-            }
-        }
-
+//
+//        String className = AppConfigHelper.getRouteMap(route);
+//
+//
+        Class newClass = Class.forName(classInstance.getClass().getName());
+//        Object classInstance = null;
+//
+//
+//
+//        synchronized (this.getClass()) {
+//            if ((classInstance = controllerInstances.get(className)) == null) {
+//                classInstance = newClass.newInstance();
+//                controllerInstances.put(className, classInstance);
+//            }
+//        }
+//
         return (String) newClass.getMethod("doGet",String.class).invoke(classInstance, uri);
 
     }

@@ -18,7 +18,11 @@ public abstract class ServeLet {
             try {
                 System.out.println("Method name:"+method);
                 content = (String)clazz.getMethod(method,String.class).invoke(this, param);
-            }catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e){
+            }catch (NoSuchMethodException e){
+                e.printStackTrace();
+            }catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }catch (InvocationTargetException e) {
                 e.printStackTrace();
             }
 
