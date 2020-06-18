@@ -20,18 +20,19 @@
 <script>
     $(function () {
         //加载课程
-        var studentId = 1;
-
         $.ajax({
             type: "GET",
-            url: "/courseList",
+            url: "/courselist",
             data: {
-                studentId: studentId
             },
             success:function (result) {
                 result = JSON.parse(result);
                 if(result['status'] != 1){
                     alert(result['msg']);
+                    if(result['status']==-1){
+                        //无权限跳转登录页
+                        window.location.href="login.html";
+                    }
                 }else{
                     $(result['data']).each( function(index, value){
                         var active = value[5] ? "mui-active" : '';
@@ -69,7 +70,6 @@
             data: {
                 courseId:courseId,
                 state:$(`#switch${courseId}`).attr("state"),
-                studentId:localStorage.getItem('studentId')
             },
             success: function (result) {
                 result = JSON.parse(result);

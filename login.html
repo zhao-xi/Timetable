@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>选课登录</title>
+</head>
+<body>
+<div class="wrap">
+    <div>
+        <h2 class="title">选课登录</h2>
+        <div class="box">
+            <input type="text" id="username" placeholder="用户名" class="in01" />
+        </div>
+        <div class="box">
+            <input type="password" id="password" placeholder="密码" class="in01"/>
+        </div>
+        <div class="box01">
+            <input type="submit" id="login" value="登录" class="btn" />
+            <input type="reset" id="reset" value="重填" class="btn" />
+        </div>
+    </div>
+</div>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    $(function () {
+        $("#login").click(function () {
+            $.ajax({
+                    type: "GET",
+                    url: "/login",
+                    data: {
+                        username:$("#username").val(),
+                        password:$("#password").val()
+                    },
+                success: function (result) {
+                    result = JSON.parse(result);
+                    if(result['status'] != 1){
+                        alert(result['msg']);
+                    }else{
+                        //localStorage.setItem("studentId",result['studentId']);
+                        //跳转
+                        window.location.href="courselist.html";
+                    }
+                }
+            });
+        });
+
+        $("#reset").click(function () {
+            $("#username").val("");
+            $("#password").val("")
+        });
+    });
+</script>
+</body>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    h2{
+        color: #000000;
+        size: 25px;
+    }
+    .wrap{
+        padding: 12px;
+        position: absolute;
+        border: 1px solid #ffec8b3b;
+        background-color: #8bd6ff17;
+        width: 200px;
+        height: 250px;
+        left: 50%;
+        top: 50%;
+        margin-left: -100px;
+        margin-top: -125px;
+        border-radius: 5%;
+    }
+    .box{
+        margin-top: 25px;
+        margin-bottom: 25px;
+    }
+    .in01{
+        height: 35px;
+        width: 175px;
+        border: 0px;
+        border-radius: 5px;
+        margin-left: 10px;
+        background-color: #c5c5c3b0;
+    }
+    .btn{
+        width: 55px;
+        height: 29px;
+        margin-left: 30px;
+        border: 0px;
+        border-radius: 10%;
+        background-color: #94b6de4d;
+    }
+    .btn:hover{
+        background-color: #36648B;
+        color: white;
+    }
+</style>
+</html>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans>
+<beans>
+    <bean route="/login" class="evostar.controller.LoginServeLet" ></bean>
+    <bean route="/courselist" class="evostar.controller.CourseServeLet" ></bean>
+    <bean route="/changeSelected" class="evostar.controller.CourseServeLet" ></bean>
+    <bean route="/selectedCourse" class="evostar.controller.CourseServeLet" ></bean>
+</beans>

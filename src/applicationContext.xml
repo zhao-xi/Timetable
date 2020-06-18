@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean name="/login" class="evostar.controller.LoginServeLet" >
+        <property name="webAppContext" ref="webAppContext"></property>
+        <property name="mysqlManage" ref="mysqlManage"></property>
+    </bean>
+    <bean name="/courselist" class="evostar.controller.CourseServeLet" >
+        <property name="webAppContext" ref="webAppContext"></property>
+        <property name="mysqlManage" ref="mysqlManage"></property>
+    </bean>
+    <bean name="/changeSelected" class="evostar.controller.CourseServeLet" >
+        <property name="webAppContext" ref="webAppContext"></property>
+        <property name="mysqlManage" ref="mysqlManage"></property>
+    </bean>
+    <bean name="/selectedCourse" class="evostar.controller.CourseServeLet" >
+        <property name="webAppContext" ref="webAppContext"></property>
+        <property name="mysqlManage" ref="mysqlManage"></property>
+    </bean>
+
+
+    <bean id="webServer" class="evostar.WebServer" scope="singleton">
+        <property name="serverSocket" ref="serverSocket"></property>
+    </bean>
+    <bean id="serverSocket" class="java.net.ServerSocket" scope="singleton">
+        <constructor-arg value="8080"></constructor-arg>
+    </bean>
+
+    <bean id="webAppContext" class="evostar.WebAppContext"></bean>
+
+    <bean id="mysqlManage" class="evostar.MysqlManage"></bean>
+
+    <bean id="httpRequest" class="evostar.HttpRequest"></bean>
+
+    <bean id="httpResponse" class="evostar.HttpResponse"></bean>
+
+    <bean id="processor" class="evostar.Processor" scope="prototype"></bean>
+
+    <bean id="log" class="evostar.Log"></bean>
+    <!--LoginAspect切面类-->
+    <bean id="loginAspect" class="evostar.aspect.LoginAspect">
+        <property name="webAppContext" ref="webAppContext"></property>
+        <property name="httpRequest" ref="httpRequest"></property>
+        <property name="httpResponse" ref="httpResponse"></property>
+    </bean>
+    <!--Course切面类-->
+    <bean id="courseAspect" class="evostar.aspect.CourseAspect">
+        <property name="mysqlManage" ref="mysqlManage"></property>
+    </bean>
+
+    <aop:config>
+        <!--定义登录检查切入点-->
+        <aop:pointcut id="changeMySelected" expression="execution(* evostar.controller.CourseServeLet.changeSelected(..))"/>
+        <!--定义选课接口切入点-->
+        <aop:pointcut id="checkSessionForController" expression="execution(* evostar.controller.CourseServeLet.*(..))"/>
+
+        <aop:aspect ref="loginAspect">
+            <aop:around method="checkSession" pointcut-ref="checkSessionForController"/>
+        </aop:aspect>
+        <aop:aspect ref="courseAspect">
+            <aop:after-returning returning="result" method="record" pointcut-ref="changeMySelected"/>
+        </aop:aspect>
+    </aop:config>
+</beans>

@@ -110,11 +110,17 @@
           type: "GET",
           url: "/selectedCourse",
           data: {
-              studentId:  1
+              studentId: localStorage.getItem('studentId') ? localStorage.getItem('studentId') : 1
           },
           success: function (result) {
               result = JSON.parse(result);
-              if(result['status'] == 1){
+              if(result['status'] != 1){
+                  alert(result['msg']);
+                  if(result['status']==-1){
+                      //无权限跳转登录页
+                      window.location.href="login.html";
+                  }
+              }else {
                   timetable = JSON.parse(result['data']);
                   console.log(timetable);
                   var week = window.innerWidth > 360 ? [' 周一', '周二', '周三', '周四', '周五'] :
