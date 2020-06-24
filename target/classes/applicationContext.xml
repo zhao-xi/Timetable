@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!--把dao层绑定到spring-->
+    <bean id="userDAO" class="evostar.dao.UserDAO">
+        <property name="dataSource" ref="dataSources"></property>
+    </bean>
+    <bean id="selectedCourseDAO" class="evostar.dao.SelectedCourseDAO">
+        <property name="dataSource" ref="dataSources"></property>
+    </bean>
+    <bean id="courseListDAO" class="evostar.dao.CourseListDAO">
+        <property name="dataSource" ref="dataSources"></property>
+    </bean>
+
+    <bean name="/login" class="evostar.controller.LoginServeLet" >
+        <property name="webAppContext" ref="webAppContext"></property>
+    </bean>
+    <bean name="/courselist" class="evostar.controller.CourseServeLet" >
+        <property name="webAppContext" ref="webAppContext"></property>
+    </bean>
+    <bean name="/changeSelected" class="evostar.controller.CourseServeLet" >
+        <property name="webAppContext" ref="webAppContext"></property>
+    </bean>
+    <bean name="/selectedCourse" class="evostar.controller.CourseServeLet" >
+        <property name="webAppContext" ref="webAppContext"></property>
+    </bean>
+
+
+    <bean id="webServer" class="evostar.WebServer" scope="singleton">
+        <property name="serverSocket" ref="serverSocket"></property>
+    </bean>
+    <bean id="serverSocket" class="java.net.ServerSocket" scope="singleton">
+        <constructor-arg value="8080"></constructor-arg>
+    </bean>
+
+    <bean id="webAppContext" class="evostar.WebAppContext"></bean>
+
+    <bean id="httpRequest" class="evostar.HttpRequest"></bean>
+
+    <bean id="httpResponse" class="evostar.HttpResponse"></bean>
+
+    <bean id="processor" class="evostar.Processor" scope="prototype"></bean>
+
+    <bean id="log" class="evostar.Log"></bean>
+
+
+    <!--平台事务管理-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSources"></property>
+    </bean>
+    <!--开启事务注解-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <context:annotation-config />
+
+
+<!--    jdbc and database   -->
+    <context:property-placeholder location="jdbc.properties"/>
+    <bean id="dataSources" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driverClass}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+
+
+    <!--LoginAspect切面类-->
+    <bean id="loginAspect" class="evostar.aspect.LoginAspect">
+        <property name="webAppContext" ref="webAppContext"></property>
+        <property name="httpRequest" ref="httpRequest"></property>
+        <property name="httpResponse" ref="httpResponse"></property>
+    </bean>
+    <!--Course切面类-->
+    <bean id="courseAspect" class="evostar.aspect.CourseAspect"/>
+
+    <aop:config>
+        <!--定义登录检查切入点-->
+        <aop:pointcut id="changeMySelected" expression="execution(* evostar.controller.CourseServeLet.changeSelected(..))"/>
+        <!--定义选课接口切入点-->
+        <aop:pointcut id="checkSessionForController" expression="execution(* evostar.controller.CourseServeLet.*(..))"/>
+
+        <aop:aspect ref="loginAspect">
+            <aop:around method="checkSession" pointcut-ref="checkSessionForController"/>
+        </aop:aspect>
+        <aop:aspect ref="courseAspect">
+            <aop:after-returning returning="result" method="record" pointcut-ref="changeMySelected"/>
+        </aop:aspect>
+    </aop:config>
+</beans>
