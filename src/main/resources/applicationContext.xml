@@ -68,7 +68,16 @@
         <property name="username" value="${jdbc.username}"/>
         <property name="password" value="${jdbc.password}"/>
     </bean>
-
+    
+    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:Mybatis.xml"/>
+        <property name="dataSource" ref="dataSources"/>
+        <property name="typeAliasesPackage" value="evostar.pojo"/>
+    </bean>
+    <!--动态代理-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="evostar.mapper"></property>
+    </bean>
 
     <!--LoginAspect切面类-->
     <bean id="loginAspect" class="evostar.aspect.LoginAspect">
@@ -92,4 +101,7 @@
             <aop:after-returning returning="result" method="record" pointcut-ref="changeMySelected"/>
         </aop:aspect>
     </aop:config>
+
+    <!--扫描service-->
+    <context:component-scan base-package="evostar.service"/>
 </beans>

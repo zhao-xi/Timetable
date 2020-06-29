@@ -3,21 +3,19 @@ package evostar.controller;
 import evostar.*;
 import evostar.dao.UserDAO;
 import evostar.pojo.User;
+import evostar.service.UserService;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class LoginServeLet extends ServeLet {
     @Autowired
-    private UserDAO userDAO;
+    private UserService userService;
 
     //需要参数 username password
     //登录成功后需要setCookie
@@ -36,7 +34,7 @@ public class LoginServeLet extends ServeLet {
         String username = param.get("username");
         String password = param.get("password");
 
-        User user = userDAO.getUserByUsername(username);
+        User user = userService.getUserByUsername(username);
         System.out.println(user);
 
         if(user.getId() == 0){

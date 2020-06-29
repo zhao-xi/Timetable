@@ -3,8 +3,11 @@ package evostar.controller;
 import evostar.*;
 import evostar.dao.CourseListDAO;
 import evostar.dao.SelectedCourseDAO;
+import evostar.mapper.CourseListMapper;
+import evostar.mapper.SelectedCourseMapper;
 import evostar.pojo.CourseList;
 import evostar.pojo.SelectedCourse;
+import evostar.service.CourseListService;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,17 +24,17 @@ import java.util.Map;
 
 public class CourseServeLet extends ServeLet {
     @Autowired
-    private CourseListDAO courseListDAO;
+    private CourseListService courseListService;
     @Autowired
-    private SelectedCourseDAO selectedCourseDAO;
+    private SelectedCourseMapper selectedCourseMapper;
 
     //参数studentId
     //获取所有课程数据
     public void courselist(HttpRequest request, HttpResponse response) throws SQLException, ClassNotFoundException, ParserConfigurationException, SAXException, IOException {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         String studentId = request.getUserID();
         System.out.println(studentId);
-        List<CourseList> courseList = courseListDAO.getCourseList(Integer.parseInt(studentId));
+        List<CourseList> courseList = courseListService.getCourseList(Integer.parseInt(studentId));
 
         map.put("status",1);
         map.put("msg","获取成功");
@@ -65,16 +68,18 @@ public class CourseServeLet extends ServeLet {
         int courseId = Integer.parseInt(param.get("courseId"));
         int state = Integer.parseInt(param.get("state"));
         String studentId = request.getUserID();
-
+        SelectedCourse selectedCourse = new SelectedCourse();
+        selectedCourse.setCourse_id(courseId);
+        selectedCourse.setStudent_id(Integer.parseInt(studentId));
 
         if(state == 1){
             //删除操作
-            selectedCourseDAO.delete(courseId, Integer.parseInt(studentId));
-            courseListDAO.decrease_total_num(courseId);
+            selectedCourseMapper.delete(selectedCourse);
+            courseListService.decrease_total_num(courseId);
         }else{
             //添加操作
-            selectedCourseDAO.insert(courseId, Integer.parseInt(studentId));
-            courseListDAO.increase_total_num(courseId);
+            selectedCourseMapper.insert(selectedCourse);
+            courseListService.increase_total_num(courseId);
         }
 
         //执行成功
@@ -96,7 +101,7 @@ public class CourseServeLet extends ServeLet {
 
         studentId = request.getUserID();
 
-        List<SelectedCourse> list =selectedCourseDAO.getSelectedCourse(Integer.parseInt(studentId));
+        List<SelectedCourse> list =selectedCourseMapper.getSelectedCourse(Integer.parseInt(studentId));
         String[][] selected = new String[5][6];
 
         for(SelectedCourse course : list) {

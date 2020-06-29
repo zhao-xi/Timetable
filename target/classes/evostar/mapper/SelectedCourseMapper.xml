@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="evostar.mapper.SelectedCourseMapper">
+    <insert id="insert" parameterType="int">
+        insert into
+            selected_course (course_id, student_id)
+        values (#{course_id}, #{student_id})
+    </insert>
+    <delete id="delete" parameterType="int">
+        delete from
+            selected_course
+        where
+            course_id = #{course_id} and student_id = #{student_id}
+    </delete>
+    
+    <resultMap id="SelectedCourse" type="evostar.pojo.SelectedCourse">
+        <result property="course_id" column="course_id"/>
+        <result property="student_id" column="student_id"/>
+        <association property="classroom" javaType="evostar.pojo.ClassRoom">
+            <result property="name" column="classroom_name"/>
+        </association>
+        <association property="teacher" javaType="evostar.pojo.Teacher">
+            <result property="name" column="teacher_name"/>
+        </association>
+        <association property="courseList" javaType="evostar.pojo.CourseList">
+            <id property="id" column="courseList_id"/>
+            <result property="name" column="name"/>
+            <result property="day" column="day"/>
+            <result property="begin" column="begin"/>
+        </association>
+    </resultMap>
+    <select id="getSelectedCourse" parameterType="int" resultMap="SelectedCourse">
+        select
+            selected_course.course_id,
+            selected_course.student_id,
+            course_list.id as courseList_id,
+            course_list.name,
+            course_list.day,
+            course_list.begin,
+            teacher.name as teacher_name,
+            classroom.name as classroom_name
+        from
+            selected_course
+        left join
+            course_list
+        on
+            selected_course.course_id = course_list.id
+        left join
+            teacher
+        on
+            course_list.teacher_id = teacher.id
+        left join
+            classroom
+        on
+            course_list.room_id = classroom.room_id
+        where
+            selected_course.student_id = #{studentId}
+    </select>
+</mapper>
